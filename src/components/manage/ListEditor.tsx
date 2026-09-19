@@ -1,0 +1,4 @@
+interface ListEditorProps { label: string; values: string[]; onChange: (values: string[]) => void; max?: number }
+export function ListEditor({ label, values, onChange, max = 30 }: ListEditorProps) {
+  return <div className="manage-field"><span>{label}</span><div className="manage-list-editor">{values.map((value, index) => <div key={index}><input value={value} onChange={event => onChange(values.map((entry, position) => position === index ? event.target.value : entry))} aria-label={`${label} ${index + 1}`} /><button type="button" aria-label={`Remove ${label} ${index + 1}`} onClick={() => onChange(values.filter((_, position) => position !== index))}>×</button></div>)}<button type="button" className="add-row" disabled={values.length >= max} onClick={() => onChange([...values, ''])}>[ + ADD {label.toUpperCase().replace(/S$/, '')} ]</button></div></div>;
+}

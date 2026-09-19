@@ -1,0 +1,4 @@
+interface DeleteConfirmationProps { type: string; target: string; busy: boolean; onCancel: () => void; onDelete: () => void }
+export function DeleteConfirmation({ type, target, busy, onCancel, onDelete }: DeleteConfirmationProps) {
+  return <div className="manage-modal-backdrop" role="presentation" onClick={onCancel}><div className="manage-modal" role="alertdialog" aria-modal="true" aria-label={`Delete ${type}`} onClick={event => event.stopPropagation()}><div className="manage-modal-title">DELETE {type.toUpperCase()}?</div><p>TARGET: <strong>{target}</strong></p><p>This operation cannot be undone.</p><div className="manage-actions"><button onClick={onCancel} disabled={busy}>[ CANCEL ]</button><button className="danger" onClick={onDelete} disabled={busy}>{busy ? '[ DELETING... ]' : '[ DELETE ]'}</button></div></div></div>;
+}
