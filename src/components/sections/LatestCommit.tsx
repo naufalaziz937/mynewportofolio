@@ -1,6 +1,11 @@
-import { GitCommitHorizontal } from 'lucide-react';
+import { FolderGit2 } from 'lucide-react';
+import { usePortfolio } from '../../context/PortfolioContext';
+import { DecryptingTextLoader } from '../ui/DecryptingTextLoader';
 import { TerminalPanel } from '../ui/TerminalPanel';
+import { TerminalSkeleton } from '../ui/TerminalSkeleton';
 
 export function LatestCommit() {
-  return <div className="latest-commit"><div className="section-command"><span className="command-chevron">&gt;</span> latest_commit<span className="command-tail" /><span className="command-meta">// activity</span></div><TerminalPanel title="git log --oneline -1"><div className="commit-content"><div className="commit-meta"><span><GitCommitHorizontal size={16} /> commit <b>a82df92</b></span><span>recent activity</span></div><h3>Update portfolio: improve UI and add new projects</h3><div className="commit-changes"><span>+ Refactor components</span><span>+ Optimize animations</span><span>+ Add new content</span></div></div></TerminalPanel></div>;
+  const { projects } = usePortfolio();
+  const featured = projects.data.find(project => project.featured) ?? projects.data[0];
+  return <div className="latest-commit"><div className="section-command"><span className="command-chevron">&gt;</span> featured_project<span className="command-tail" /><span className="command-meta">// selected work</span></div><TerminalPanel title="ls ./projects --featured"><div className="commit-content"><div className="commit-meta"><span><FolderGit2 size={16} /> project <b><DecryptingTextLoader value={featured?.slug} loading={projects.loading} estimatedLength={12} /></b></span><span>portfolio activity</span></div><h3>{projects.loading ? <DecryptingTextLoader loading estimatedLength={20} /> : featured?.name || (projects.error ? 'Unable to load projects.' : 'No featured project yet.')}</h3><div className="commit-changes">{projects.loading ? <TerminalSkeleton lines={2} /> : featured?.stack.map(item => <span key={item}>+ {item}</span>)}</div></div></TerminalPanel></div>;
 }

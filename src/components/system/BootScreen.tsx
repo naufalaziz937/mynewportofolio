@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react';
 
-const key = 'portfolio-os-booted';
-function hasBooted(): boolean { try { return sessionStorage.getItem(key) === 'yes'; } catch { return false; } }
-function markBooted(): void { try { sessionStorage.setItem(key, 'yes'); } catch { /* Session storage can be unavailable. */ } }
-interface BootScreenProps { onComplete: () => void; os: string; username: string; hostname: string }
-export function BootScreen({ onComplete, os, username, hostname }: BootScreenProps) {
-  const [step, setStep] = useState(0);
+interface BootScreenProps {
+  os: string;
+  username?: string;
+  hostname?: string;
+  dataReady: boolean;
+  skipCosmetics: boolean;
+  completing: boolean;
+  error: string | null;
+  onRetry: () => void;
+  onSkip: () => void;
+}
+
+export function BootScreen({ os, username, hostname, dataReady, skipCosmetics, completing, error, onRetry, onSkip }: BootScreenProps) {
+  const [cosmeticStep, setCosmeticStep] = useState(0);
+
   useEffect(() => {
-    if (hasBooted() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { markBooted(); onComplete(); return; }
-    const interval = window.setInterval(() => setStep(current => Math.min(current + 1, 5)), 230);
-    const timeout = window.setTimeout(() => { markBooted(); onComplete(); }, 1650);
-    return () => { window.clearInterval(interval); window.clearTimeout(timeout); };
-  }, [onComplete]);
-  const skip = () => { markBooted(); onComplete(); };
-  return <div className="boot-screen" role="status" aria-live="polite"><div className="boot-terminal"><div className="boot-top"><span>{os} v1.0</span><button onClick={skip}>[ skip ]</button></div><div className="boot-lines">{['initializing kernel', 'loading interface', 'loading profile', 'loading projects'].map((line, index) => <p key={line} className={step > index ? 'visible' : ''}>&gt; {line} <span>........ OK</span></p>)}<p className={`boot-ready ${step >= 4 ? 'visible' : ''}`}>SYSTEM READY.</p><p className={step >= 5 ? 'visible' : ''}>{username}@{hostname}:~$ <span className="blinking-cursor">_</span></p></div></div></div>;
+    const first = window.setTimeout(() => setCosmeticStep(1), 180);
+    const second = window.setTimeout(() => setCosmeticStep(2), 360);
+    return () => { window.clearTimeout(first); window.clearTimeout(second); };
+  }, []);
+
+  return <div className="boot-screen" role="status" aria-live="polite"><div className="boot-terminal">
+    <div className="boot-top"><span>{os} v1.0</span><button type="button" onClick={onSkip}>[ skip ]</button></div>
+    <div className="boot-lines">
+      <p className="visible">&gt; initializing kernel <span>........ OK</span></p>
+      <p className={skipCosmetics || cosmeticStep >= 1 ? 'visible' : ''}>&gt; loading interface <span>........ OK</span></p>
+      <p className={skipCosmetics || cosmeticStep >= 2 || dataReady || !!error ? 'visible' : ''}>&gt; loading profile <span className={error ? 'boot-failed' : ''}>........ {error ? 'FAILED' : dataReady ? 'OK' : ''}</span></p>
+      {error && <p className="visible boot-error-detail">{error}</p>}
+      {error && <p className="visible"><button type="button" className="boot-retry" onClick={onRetry}>[ retry ]</button></p>}
+      <p className={`boot-ready ${completing ? 'visible' : ''}`}>SYSTEM READY.</p>
+      <p className={completing && username && hostname ? 'visible' : ''}>{username && hostname ? `${username}@${hostname}:~$` : ''} <span className="blinking-cursor">_</span></p>
+    </div>
+  </div></div>;
 }

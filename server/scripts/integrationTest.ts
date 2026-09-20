@@ -29,11 +29,11 @@ async function test(): Promise<void> {
     const lanResponse = await request(app).get('/api/health').set('Origin', 'http://192.168.1.5:5173').expect(200);
     if (lanResponse.headers['access-control-allow-origin'] !== 'http://192.168.1.5:5173') throw new Error('LAN origin is not allowed by CORS');
     await request(app).post('/api/contact').set('Origin', 'http://192.168.1.5:5173').send({}).expect(400);
-    const profile = { name: 'Davy', username: 'davy', role: 'Full-Stack Developer', location: 'Indonesia', status: 'Available', heroGreeting: "Hi, I'm", heroDescription: ['Building useful things.'], about: 'A developer bio.', profileImage: '', profileImagePublicId: '', email: 'davy@example.com', github: '', instagram: '', cvUrl: '', cvPublicId: '' };
+    const profile = { name: 'Example Developer', username: 'example', role: 'Full-Stack Developer', location: 'Indonesia', status: 'Available', heroGreeting: "Hi, I'm", heroDescription: ['Building useful things.'], about: 'A developer bio.', profileImage: '', profileImagePublicId: '', email: 'example@example.com', github: '', instagram: '', cvUrl: '', cvPublicId: '' };
     await agent.put('/api/manage/profile').set('Origin', origin).send(profile).expect(200);
     const publicProfile = await request(app).get('/api/profile').expect(200);
-    if (publicProfile.body.data.name !== 'Davy') throw new Error('Profile write did not reach public API');
-    const settings = { siteTitle: 'Portfolio OS', terminalUsername: 'davy', terminalHostname: 'portfolio', systemOS: 'portfolioOS', footerQuote: 'Ship thoughtfully.', availabilityStatus: 'Available', bootEnabled: true, sideStreamEnabled: true, crtEnabled: true };
+    if (publicProfile.body.data.name !== 'Example Developer') throw new Error('Profile write did not reach public API');
+    const settings = { siteTitle: 'Portfolio OS', terminalUsername: 'example', terminalHostname: 'portfolio', systemOS: 'portfolioOS', footerQuote: 'Ship thoughtfully.', availabilityStatus: 'Available', bootEnabled: true, sideStreamEnabled: true, crtEnabled: true };
     await agent.put('/api/manage/settings').set('Origin', origin).send(settings).expect(200);
     if ((await request(app).get('/api/settings').expect(200)).body.data.footerQuote !== 'Ship thoughtfully.') throw new Error('Settings did not update');
     const project = { name: 'Test Project', slug: 'test-project', shortDescription: 'An integration test project.', overview: '', problem: '', solution: '', challenges: '', result: '', features: ['Feature'], thumbnail: '', thumbnailPublicId: '', gallery: [], galleryPublicIds: [], stack: ['React'], status: 'development', githubUrl: '', liveUrl: '', featured: true, displayOrder: 2 };
@@ -85,3 +85,4 @@ async function test(): Promise<void> {
   } finally { await disconnectDatabase(); await mongo.stop(); }
 }
 test().catch(error => { console.error(error); process.exitCode = 1; });
+

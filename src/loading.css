@@ -1,0 +1,8 @@
+.decrypting-text{display:inline-block;font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums;white-space:pre-wrap}
+.terminal-skeleton{display:grid;gap:9px;width:100%;max-width:65ch}.terminal-skeleton span{height:.8em;display:block;border-radius:2px;background:linear-gradient(90deg,rgba(0,255,102,.13),rgba(0,255,102,.055));min-width:2ch}
+.hero-description .terminal-skeleton{min-height:4.5em}.about-bio .terminal-skeleton{min-height:4.5em}
+.loading-project-card{pointer-events:none;min-height:407px}.loading-project-card .project-image{display:flex;align-items:center;justify-content:center;color:#30583d}.loading-project-card .project-card-body{min-height:225px}.loading-project-card h3{color:#b8dcc0}.loading-project-card .project-stack{min-height:29px}.loading-project-card .project-links{margin-top:14px}
+.loading-skill-row{min-height:43px}.loading-experience{min-height:180px}.loading-certificate{min-height:240px}.loading-certificate .certificate-image-placeholder{height:160px;background:#07160d}.loading-certificate>div{padding:20px}
+.loading-contact-link{color:#668c70}.hero-name .decrypting-text{vertical-align:baseline}
+.portfolio-reveal{animation:portfolio-reveal .22s ease-out both}.boot-failed,.boot-error-detail{color:#ff8d82!important}.boot-error-detail{overflow-wrap:anywhere}.boot-retry{border:1px solid #ff8d82;background:transparent;color:#ff8d82;padding:5px 10px}.boot-retry:hover{background:rgba(255,141,130,.12)}@keyframes portfolio-reveal{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.loading-project-card,.loading-experience,.loading-certificate{animation:none}}

@@ -14,7 +14,15 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
   const [certificates, setCertificates] = useState<Resource<Certificate[]>>(initial([]));
   const [settings, setSettings] = useState<Resource<SiteSettings | null>>(initial(null));
   const [revision, setRevision] = useState(0);
-  const retry = useCallback(() => setRevision(value => value + 1), []);
+  const retry = useCallback(() => {
+    setProfile(initial(null));
+    setProjects(initial([]));
+    setSkills(initial([]));
+    setExperience(initial([]));
+    setCertificates(initial([]));
+    setSettings(initial(null));
+    setRevision(value => value + 1);
+  }, []);
   useEffect(() => {
     let active = true;
     const load = <T,>(request: () => Promise<T>, setter: (value: Resource<T>) => void, previous: T) => {

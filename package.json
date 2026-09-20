@@ -1,5 +1,5 @@
 {
-  "name": "davy-portfolio-os",
+  "name": "terminal-portfolio-os",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -45,3 +45,4 @@
     "autoprefixer": "^10.4.0"
   }
 }
+

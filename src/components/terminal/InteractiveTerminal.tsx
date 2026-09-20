@@ -5,7 +5,7 @@ import { createCommands, executeCommand } from '../../utils/terminalCommands';
 import { scrollToSection } from '../../utils/scrollToSection';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { useAuth } from '../../context/AuthContext';
-import { profile as fallbackProfile, defaultSettings } from '../../data/profile';
+import { DecryptingTextLoader } from '../ui/DecryptingTextLoader';
 import type { TerminalHistoryItem } from '../../types/terminal';
 
 interface InteractiveTerminalProps { open: boolean; onClose: () => void; onOpen: () => void }
@@ -14,10 +14,10 @@ export function InteractiveTerminal({ open, onClose, onOpen }: InteractiveTermin
   const navigate = useNavigate();
   const { login } = useAuth();
   const portfolio = usePortfolio();
-  const person = portfolio.profile.data ?? fallbackProfile;
-  const settings = portfolio.settings.data ?? defaultSettings;
-  const prompt = `${settings.terminalUsername}@${settings.terminalHostname}:~$`;
-  const commands = useMemo(() => createCommands({ profile: person, settings, projects: portfolio.projects.data, skills: portfolio.skills.data, experience: portfolio.experience.data, certificates: portfolio.certificates.data }), [person, settings, portfolio.projects.data, portfolio.skills.data, portfolio.experience.data, portfolio.certificates.data]);
+  const person = portfolio.profile.data;
+  const settings = portfolio.settings.data;
+  const prompt = <><DecryptingTextLoader value={settings?.terminalUsername} loading={portfolio.settings.loading} estimatedLength={8} />@<DecryptingTextLoader value={settings?.terminalHostname} loading={portfolio.settings.loading} estimatedLength={9} />:~$</>;
+  const commands = useMemo(() => createCommands({ profile: person, settings, profileLoading: portfolio.profile.loading, settingsLoading: portfolio.settings.loading, projects: portfolio.projects.data, skills: portfolio.skills.data, experience: portfolio.experience.data, certificates: portfolio.certificates.data }), [person, settings, portfolio.profile.loading, portfolio.settings.loading, portfolio.projects.data, portfolio.skills.data, portfolio.experience.data, portfolio.certificates.data]);
   const [value, setValue] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<InputMode>('command');
@@ -78,5 +78,6 @@ export function InteractiveTerminal({ open, onClose, onOpen }: InteractiveTermin
     if (event.key === 'ArrowDown') { event.preventDefault(); const index = historyIndex - 1; setHistoryIndex(index); setValue(index >= 0 ? history[index] : ''); }
     if (event.key === 'Tab') { const matches = Object.keys(commands).filter(name => name.startsWith(value.toLowerCase())); if (matches.length === 1) { event.preventDefault(); setValue(matches[0]); } }
   };
-  return <div className={`interactive-terminal ${open ? 'open' : ''}`} aria-label="Interactive terminal"><div className="terminal-titlebar"><div><TerminalSquare size={15} /><span>terminal — {settings.terminalUsername}@{settings.terminalHostname}</span></div><div><span className="terminal-shortcut">CTRL + `</span><button onClick={open ? closeTerminal : onOpen} aria-label={open ? 'Close terminal' : 'Open terminal'}>{open ? <X size={17} /> : <ChevronDown size={17} />}</button></div></div>{open && <div className="terminal-body" ref={outputRef} onClick={() => inputRef.current?.focus()}><div className="terminal-greeting">{settings.systemOS} interactive shell <span>v1.0</span></div>{items.map(item => <div className="terminal-history-item" key={item.id}><div>{item.input && <><span>{item.input.startsWith('Password:') ? '' : prompt}</span> {item.input}</>}</div>{item.output.map((line, index) => <pre key={index}>{line}</pre>)}</div>)}<form onSubmit={event => { void submit(event); }}><label htmlFor="terminal-input">{mode === 'command' ? prompt : 'Password:'}</label><input ref={inputRef} id="terminal-input" type={mode === 'command' ? 'text' : 'password'} value={mode === 'command' ? value : password} onChange={event => mode === 'command' ? setValue(event.target.value) : setPassword(event.target.value)} onKeyDown={handleKeyDown} autoComplete="off" spellCheck={false} disabled={mode === 'authenticating'} aria-label={mode === 'command' ? 'Type terminal command' : 'Admin password'} /></form></div>}</div>;
+  return <div className={`interactive-terminal ${open ? 'open' : ''}`} aria-label="Interactive terminal"><div className="terminal-titlebar"><div><TerminalSquare size={15} /><span>terminal — {prompt}</span></div><div><span className="terminal-shortcut">CTRL + `</span><button onClick={open ? closeTerminal : onOpen} aria-label={open ? 'Close terminal' : 'Open terminal'}>{open ? <X size={17} /> : <ChevronDown size={17} />}</button></div></div>{open && <div className="terminal-body" ref={outputRef} onClick={() => inputRef.current?.focus()}><div className="terminal-greeting"><DecryptingTextLoader value={settings?.systemOS} loading={portfolio.settings.loading} estimatedLength={11} /> interactive shell <span>v1.0</span></div>{items.map(item => <div className="terminal-history-item" key={item.id}><div>{item.input && <><span>{item.input.startsWith('Password:') ? '' : prompt}</span> {item.input}</>}</div>{item.output.map((line, index) => <pre key={index}>{line}</pre>)}</div>)}<form onSubmit={event => { void submit(event); }}><label htmlFor="terminal-input">{mode === 'command' ? prompt : 'Password:'}</label><input ref={inputRef} id="terminal-input" type={mode === 'command' ? 'text' : 'password'} value={mode === 'command' ? value : password} onChange={event => mode === 'command' ? setValue(event.target.value) : setPassword(event.target.value)} onKeyDown={handleKeyDown} autoComplete="off" spellCheck={false} disabled={mode === 'authenticating'} aria-label={mode === 'command' ? 'Type terminal command' : 'Admin password'} /></form></div>}</div>;
 }
+

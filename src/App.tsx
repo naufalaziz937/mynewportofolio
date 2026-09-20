@@ -18,7 +18,6 @@ import { ContactSection } from './components/sections/ContactSection';
 import { InteractiveTerminal } from './components/terminal/InteractiveTerminal';
 import { useActiveSection } from './hooks/useActiveSection';
 import { usePortfolio } from './context/PortfolioContext';
-import { defaultSettings } from './data/profile';
 import { ProtectedRoute } from './components/manage/ProtectedRoute';
 import { ManageLayout } from './components/manage/ManageLayout';
 import { ManageDashboard } from './pages/manage/ManageDashboard';
@@ -28,20 +27,68 @@ import { ManageAppearance } from './pages/manage/ManageAppearance';
 import { ManageMessages } from './pages/manage/ManageMessages';
 import { ProjectDetail } from './pages/ProjectDetail';
 
-function PublicLanding() {
+type AppPhase = 'booting' | 'failed' | 'revealing';
+const MIN_BOOT_DURATION = 950;
+const CRITICAL_TIMEOUT = 15000;
+let initialBootCompleted = false;
+
+function PortfolioContent() {
   const active = useActiveSection();
   const location = useLocation();
   const { settings: resource } = usePortfolio();
-  const settings = resource.data ?? defaultSettings;
-  useEffect(() => { document.title = settings.siteTitle; }, [settings.siteTitle]);
+  const settings = resource.data;
+  useEffect(() => { document.title = settings?.siteTitle || 'portfolioOS'; }, [settings?.siteTitle]);
   useEffect(() => { if (location.hash) window.requestAnimationFrame(() => document.getElementById(location.hash.slice(1))?.scrollIntoView()); }, [location.hash]);
-  const [booted, setBooted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(false);
-  const finishBoot = useCallback(() => setBooted(true), []);
   const openTerminal = useCallback(() => setTerminalOpen(true), []);
   const closeTerminal = useCallback(() => setTerminalOpen(false), []);
-  return <>{settings.sideStreamEnabled && <SideDataStream />}{settings.crtEnabled && <CRTOverlay />}<div className="app-shell"><TopBar active={active} onMenuToggle={() => setMenuOpen(current => !current)} /><MobileNavigation open={menuOpen} active={active} onClose={() => setMenuOpen(false)} /><div className="app-layout"><TerminalSidebar active={active} /><main className="main-content"><HeroSection /><LatestCommit /><AboutSection /><ProjectsSection /><SkillsSection /><ExperienceSection /><CertificatesSection /><ContactSection /><div className="end-marker">// END OF FILE <span>— Thanks for scrolling.</span></div></main></div><InteractiveTerminal open={terminalOpen} onOpen={openTerminal} onClose={closeTerminal} /><BottomStatusBar onTerminalOpen={openTerminal} /></div>{!booted && settings.bootEnabled && <BootScreen onComplete={finishBoot} os={settings.systemOS} username={settings.terminalUsername} hostname={settings.terminalHostname} />}</>;
+  return <div className="portfolio-reveal">{settings?.sideStreamEnabled && <SideDataStream />}{settings?.crtEnabled && <CRTOverlay />}<div className="app-shell"><TopBar active={active} onMenuToggle={() => setMenuOpen(current => !current)} /><MobileNavigation open={menuOpen} active={active} onClose={() => setMenuOpen(false)} /><div className="app-layout"><TerminalSidebar active={active} /><main className="main-content"><HeroSection /><LatestCommit /><AboutSection /><ProjectsSection /><SkillsSection /><ExperienceSection /><CertificatesSection /><ContactSection /><div className="end-marker">// END OF FILE <span>— Thanks for scrolling.</span></div></main></div><InteractiveTerminal open={terminalOpen} onOpen={openTerminal} onClose={closeTerminal} /><BottomStatusBar onTerminalOpen={openTerminal} /></div></div>;
+}
+
+function PublicLanding() {
+  const { profile, settings, retry } = usePortfolio();
+  const [phase, setPhase] = useState<AppPhase>(() => initialBootCompleted ? 'revealing' : 'booting');
+  const [minimumElapsed, setMinimumElapsed] = useState(false);
+  const [skipCosmetics, setSkipCosmetics] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const criticalReady = !profile.loading && !settings.loading && !!profile.data && !!settings.data && !profile.error && !settings.error;
+  const criticalError = profile.error || settings.error || (!profile.loading && !profile.data ? 'Profile is unavailable.' : null) || (!settings.loading && !settings.data ? 'Site settings are unavailable.' : null) || (timedOut ? 'The portfolio API did not respond in time.' : null);
+
+  useEffect(() => {
+    if (phase === 'revealing') return;
+    const minimum = window.setTimeout(() => setMinimumElapsed(true), MIN_BOOT_DURATION);
+    return () => window.clearTimeout(minimum);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'booting' || criticalReady) return;
+    const timeout = window.setTimeout(() => setTimedOut(true), CRITICAL_TIMEOUT);
+    return () => window.clearTimeout(timeout);
+  }, [phase, criticalReady]);
+
+  useEffect(() => {
+    if (phase === 'booting' && criticalError) setPhase('failed');
+  }, [phase, criticalError]);
+
+  const canComplete = phase === 'booting' && criticalReady && (minimumElapsed || skipCosmetics || settings.data?.bootEnabled === false);
+  useEffect(() => {
+    if (!canComplete) return;
+    setCompleting(true);
+    const timeout = window.setTimeout(() => { initialBootCompleted = true; setPhase('revealing'); }, skipCosmetics ? 0 : 180);
+    return () => window.clearTimeout(timeout);
+  }, [canComplete, skipCosmetics]);
+
+  const handleRetry = useCallback(() => {
+    setTimedOut(false);
+    setCompleting(false);
+    setPhase('booting');
+    retry();
+  }, [retry]);
+
+  if (phase !== 'revealing') return <BootScreen os={settings.data?.systemOS || 'portfolioOS'} username={settings.data?.terminalUsername} hostname={settings.data?.terminalHostname} dataReady={criticalReady} skipCosmetics={skipCosmetics} completing={completing} error={phase === 'failed' ? criticalError || 'Unable to load portfolio data.' : null} onRetry={handleRetry} onSkip={() => setSkipCosmetics(true)} />;
+  return <PortfolioContent />;
 }
 
 export default function App() {

@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { PortfolioProvider } from './context/PortfolioContext';
 import './styles.css';
+import './loading.css';
 import './manage.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

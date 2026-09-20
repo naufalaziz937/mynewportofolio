@@ -1,4 +1,4 @@
-# Davy // portfolioOS
+# portfolioOS
 
 The public Terminal OS portfolio and a protected content management workspace. React, TypeScript, Vite, and Tailwind power the frontend; Express, TypeScript, Mongoose, and MongoDB power the API. Public content is fetched from MongoDB. The local data from the first landing page is available through an explicit seed script.
 
@@ -8,7 +8,7 @@ The public Terminal OS portfolio and a protected content management workspace. R
 2. Run `npm install` in the repository and `npm install` in `server/`.
 3. Copy `server/.env.example` to `server/.env`. Set `MONGODB_URI`, `CLIENT_URL`, and a random `AUTH_SECRET` of at least 32 characters. Keep this file private. The default frontend URL is `http://localhost:5173`.
 4. Set `ADMIN_USERNAME` and a strong `ADMIN_INITIAL_PASSWORD` in the server environment, then run `npm run create-admin --prefix server` once. This command refuses to overwrite an existing admin. Remove `ADMIN_INITIAL_PASSWORD` from the environment afterward.
-5. Run `npm run seed --prefix server` to populate missing portfolio collections from the original landing page. It only inserts into empty collections and never overwrites existing documents.
+5. Optionally run `npm run seed --prefix server` to populate empty demo project, skill, and experience collections. Set profile and site settings through the CMS; the seed command never supplies an identity. Existing documents are not overwritten.
 6. In separate terminals, run `npm run dev:api` and `npm run dev`. Visit `http://localhost:5173`.
 
 Type `admin` in the interactive terminal to enter the masked password flow. The password is verified by the API and the browser receives an HttpOnly session cookie. The `/manage` route and all `/api/manage/*` endpoints check that session. `POST /api/auth/logout` invalidates it.
@@ -34,7 +34,7 @@ The `server/.env` file is for the separate local API process only. A Vercel depl
 - Start both `npm run dev:api` and `npm run dev`; the Vite proxy cannot serve API requests while the Express server is stopped. For a physical phone, open the Vite Network URL shown in the terminal. Add that exact origin (for example `http://192.168.1.5:5173`) to `CLIENT_URLS` in `server/.env`, then restart the API. Keep `CLIENT_URL=http://localhost:5173` for desktop development. If the computer's LAN address changes, update `CLIENT_URLS`.
 - `CLIENT_URL` must match the browser origin. Cookies use `HttpOnly`, `SameSite=Lax`, and `Secure` in production. For a cross-site HTTPS deployment, set `COOKIE_SAME_SITE=none` and use HTTPS on both sides.
 - Set `TRUST_PROXY=1` only when exactly one trusted reverse proxy is in front of the API.
-- The original profile contains placeholder contact and social URLs. Edit them through `/manage/profile` after seeding. Certificates begin empty.
+- Add profile, contact, and social details through `/manage/profile`. Certificates begin empty until added through the CMS.
 - `npm run build` builds the frontend and `npm run build:api` builds the API. Run `npm run typecheck` and `npm run typecheck --prefix server` for strict TypeScript checks.
 - `npm run test:integration --prefix server` starts a temporary MongoDB for API integration tests. The first run downloads a MongoDB binary; it does not touch your configured database.
 - For browser QA without a persistent database, set a disposable `UI_TEST_PASSWORD` and run `npm run test:ui-server --prefix server`. This test-only process starts an in-memory database with sample content on port 3000; stopping it removes the data.
