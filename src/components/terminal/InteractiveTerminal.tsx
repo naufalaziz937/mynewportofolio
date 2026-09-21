@@ -17,7 +17,7 @@ export function InteractiveTerminal({ open, onClose, onOpen }: InteractiveTermin
   const person = portfolio.profile.data;
   const settings = portfolio.settings.data;
   const prompt = <><DecryptingTextLoader value={settings?.terminalUsername} loading={portfolio.settings.loading} estimatedLength={8} />@<DecryptingTextLoader value={settings?.terminalHostname} loading={portfolio.settings.loading} estimatedLength={9} />:~$</>;
-  const commands = useMemo(() => createCommands({ profile: person, settings, profileLoading: portfolio.profile.loading, settingsLoading: portfolio.settings.loading, projects: portfolio.projects.data, skills: portfolio.skills.data, experience: portfolio.experience.data, certificates: portfolio.certificates.data }), [person, settings, portfolio.profile.loading, portfolio.settings.loading, portfolio.projects.data, portfolio.skills.data, portfolio.experience.data, portfolio.certificates.data]);
+  const commands = useMemo(() => createCommands({ profile: person, settings, profileLoading: portfolio.profile.loading, settingsLoading: portfolio.settings.loading, personalLoading: portfolio.personal.loading, projects: portfolio.projects.data, skills: portfolio.skills.data, experience: portfolio.experience.data, certificates: portfolio.certificates.data, personal: portfolio.personal.data }), [person, settings, portfolio.profile.loading, portfolio.settings.loading, portfolio.personal.loading, portfolio.projects.data, portfolio.skills.data, portfolio.experience.data, portfolio.certificates.data, portfolio.personal.data]);
   const [value, setValue] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<InputMode>('command');

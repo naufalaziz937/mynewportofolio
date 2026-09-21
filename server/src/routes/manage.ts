@@ -3,8 +3,8 @@ import multer from 'multer';
 import type { Model } from 'mongoose';
 import type { z } from 'zod';
 import type { ServerConfig } from '../config/env.js';
-import { Profile, Project, Skill, Experience, Certificate, SiteSettings, Message } from '../models/index.js';
-import { profileSchema, projectSchema, skillSchema, experienceSchema, certificateSchema, settingsSchema } from '../schemas/content.js';
+import { Profile, Project, Skill, Experience, Certificate, PersonalItem, SiteSettings, Message } from '../models/index.js';
+import { profileSchema, projectSchema, skillSchema, experienceSchema, certificateSchema, personalItemSchema, settingsSchema } from '../schemas/content.js';
 import { asyncRoute, HttpError, validId } from '../middleware/http.js';
 import { removeAssets, signBrowserUpload, uploadFile, type UploadKind } from '../services/upload.js';
 
@@ -14,7 +14,7 @@ function assetIds(value: unknown): string[] {
   return [record.thumbnailPublicId, record.profileImagePublicId, record.cvPublicId, record.companyLogoPublicId, record.imagePublicId, ...(Array.isArray(record.galleryPublicIds) ? record.galleryPublicIds : [])].filter((id): id is string => typeof id === 'string' && id.length > 0);
 }
 function crud<T extends object>(router: Router, path: string, model: Model<T>, schema: z.ZodType<T>, config: ServerConfig): void {
-  router.get(`/${path}`, asyncRoute(async (_req, res) => { res.json({ success: true, data: await model.find().sort({ displayOrder: 1, createdAt: -1 }).lean() }); }));
+  router.get(`/${path}`, asyncRoute(async (_req, res) => { res.json({ success: true, data: await model.find().sort(path === 'personal' ? { category: 1, order: 1, createdAt: -1 } : { displayOrder: 1, createdAt: -1 }).lean() }); }));
   router.post(`/${path}`, asyncRoute(async (req, res) => { const data = schema.parse(req.body); const created = await model.create(data); res.status(201).json({ success: true, data: created }); }));
   router.put(`/${path}/:id`, asyncRoute(async (req, res) => {
     const data = schema.parse(req.body);
@@ -61,6 +61,7 @@ export function manageRoutes(config: ServerConfig): Router {
   crud(router, 'skills', Skill, skillSchema, config);
   crud(router, 'experience', Experience, experienceSchema, config);
   crud(router, 'certificates', Certificate, certificateSchema, config);
+  crud(router, 'personal', PersonalItem, personalItemSchema, config);
   router.get('/messages', asyncRoute(async (_req, res) => { res.json({ success: true, data: await Message.find().sort({ createdAt: -1 }).lean() }); }));
   router.patch('/messages/:id/read', asyncRoute(async (req, res) => { const updated = await Message.findByIdAndUpdate(validId(req.params.id), { read: true }, { new: true }); if (!updated) throw new HttpError(404, 'Resource not found'); res.json({ success: true, data: updated }); }));
   router.delete('/messages/:id', asyncRoute(async (req, res) => { const deleted = await Message.findByIdAndDelete(validId(req.params.id)); if (!deleted) throw new HttpError(404, 'Resource not found'); res.json({ success: true, data: { deleted: true } }); }));

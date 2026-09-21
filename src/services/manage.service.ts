@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { ProfileRecord, ProjectRecord, SkillRecord, ExperienceRecord, CertificateRecord, SettingsRecord, MessageRecord, Overview, UploadedAsset } from '../types/api';
+import type { ProfileRecord, ProjectRecord, SkillRecord, ExperienceRecord, CertificateRecord, PersonalItemRecord, SettingsRecord, MessageRecord, Overview, UploadedAsset } from '../types/api';
 
 export type ResourceName = 'projects' | 'skills' | 'experience' | 'certificates';
 export type ResourceRecord = ProjectRecord | SkillRecord | ExperienceRecord | CertificateRecord;
@@ -13,6 +13,10 @@ export const manageService = {
   create: <T extends ResourceRecord>(resource: ResourceName, data: object) => api<T>(`/manage/${resource}`, { method: 'POST', body: JSON.stringify(data) }),
   update: <T extends ResourceRecord>(resource: ResourceName, id: string, data: object) => api<T>(`/manage/${resource}/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   remove: (resource: ResourceName, id: string) => api<{ deleted: boolean }>(`/manage/${resource}/${id}`, { method: 'DELETE' }),
+  personal: () => api<PersonalItemRecord[]>('/manage/personal'),
+  createPersonal: (data: object) => api<PersonalItemRecord>('/manage/personal', { method: 'POST', body: JSON.stringify(data) }),
+  updatePersonal: (id: string, data: object) => api<PersonalItemRecord>(`/manage/personal/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  removePersonal: (id: string) => api<{ deleted: boolean }>(`/manage/personal/${id}`, { method: 'DELETE' }),
   messages: () => api<MessageRecord[]>('/manage/messages'),
   markRead: (id: string) => api<MessageRecord>(`/manage/messages/${id}/read`, { method: 'PATCH' }),
   removeMessage: (id: string) => api<{ deleted: boolean }>(`/manage/messages/${id}`, { method: 'DELETE' }),

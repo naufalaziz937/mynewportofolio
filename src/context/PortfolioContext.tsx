@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { portfolioService } from '../services/portfolio.service';
-import type { Profile, Project, Skill, Experience, Certificate, SiteSettings } from '../types/portfolio';
+import type { Profile, Project, Skill, Experience, Certificate, PersonalItem, SiteSettings } from '../types/portfolio';
 
 interface Resource<T> { data: T; loading: boolean; error: string | null }
-interface PortfolioContextValue { profile: Resource<Profile | null>; projects: Resource<Project[]>; skills: Resource<Skill[]>; experience: Resource<Experience[]>; certificates: Resource<Certificate[]>; settings: Resource<SiteSettings | null>; retry: () => void }
+interface PortfolioContextValue { profile: Resource<Profile | null>; projects: Resource<Project[]>; skills: Resource<Skill[]>; experience: Resource<Experience[]>; certificates: Resource<Certificate[]>; personal: Resource<PersonalItem[]>; settings: Resource<SiteSettings | null>; retry: () => void }
 const PortfolioContext = createContext<PortfolioContextValue | null>(null);
 const initial = <T,>(data: T): Resource<T> => ({ data, loading: true, error: null });
 export function PortfolioProvider({ children }: { children: ReactNode }) {
@@ -12,6 +12,7 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
   const [skills, setSkills] = useState<Resource<Skill[]>>(initial([]));
   const [experience, setExperience] = useState<Resource<Experience[]>>(initial([]));
   const [certificates, setCertificates] = useState<Resource<Certificate[]>>(initial([]));
+  const [personal, setPersonal] = useState<Resource<PersonalItem[]>>(initial([]));
   const [settings, setSettings] = useState<Resource<SiteSettings | null>>(initial(null));
   const [revision, setRevision] = useState(0);
   const retry = useCallback(() => {
@@ -20,6 +21,7 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
     setSkills(initial([]));
     setExperience(initial([]));
     setCertificates(initial([]));
+    setPersonal(initial([]));
     setSettings(initial(null));
     setRevision(value => value + 1);
   }, []);
@@ -34,9 +36,10 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
     load(portfolioService.skills, setSkills, []);
     load(portfolioService.experience, setExperience, []);
     load(portfolioService.certificates, setCertificates, []);
+    load(portfolioService.personal, setPersonal, []);
     load(portfolioService.settings, setSettings, null);
     return () => { active = false; };
   }, [revision]);
-  return <PortfolioContext.Provider value={{ profile, projects, skills, experience, certificates, settings, retry }}>{children}</PortfolioContext.Provider>;
+  return <PortfolioContext.Provider value={{ profile, projects, skills, experience, certificates, personal, settings, retry }}>{children}</PortfolioContext.Provider>;
 }
 export function usePortfolio(): PortfolioContextValue { const value = useContext(PortfolioContext); if (!value) throw new Error('PortfolioProvider missing'); return value; }

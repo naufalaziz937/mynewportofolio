@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { LayoutDashboard, UserRound, FolderGit2, Blocks, GitBranch, Award, SlidersHorizontal, Mail, LogOut, Menu, X, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, UserRound, FolderGit2, Blocks, GitBranch, Award, Sparkles, SlidersHorizontal, Mail, LogOut, Menu, X, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const links = [
@@ -10,6 +10,7 @@ const links = [
   { to: '/manage/skills', label: 'Skills', icon: Blocks },
   { to: '/manage/experience', label: 'Experience', icon: GitBranch },
   { to: '/manage/certificates', label: 'Certificates', icon: Award },
+  { to: '/manage/personal', label: 'Beyond the Code', icon: Sparkles },
   { to: '/manage/appearance', label: 'Appearance', icon: SlidersHorizontal },
   { to: '/manage/messages', label: 'Messages', icon: Mail }
 ];

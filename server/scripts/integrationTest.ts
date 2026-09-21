@@ -57,6 +57,17 @@ async function test(): Promise<void> {
     const certificateId: string = (await agent.post('/api/manage/certificates').set('Origin', origin).send(certificate).expect(201)).body.data._id;
     await agent.put(`/api/manage/certificates/${certificateId}`).set('Origin', origin).send({ ...certificate, name: 'Updated Certificate' }).expect(200);
     if ((await request(app).get('/api/certificates').expect(200)).body.data[0].name !== 'Updated Certificate') throw new Error('Certificate update not public');
+    const personal = { category: 'hobbies', title: 'Example hobby', description: 'Development-only test content.', image: '', imagePublicId: '', imageAlt: '', label: 'Hobby', icon: '', status: '', url: '', completed: false, size: 'large', displayMode: 'text', order: 2, visible: true };
+    await request(app).post('/api/manage/personal').set('Origin', origin).send(personal).expect(401);
+    await agent.post('/api/manage/personal').set('Origin', origin).send({ ...personal, category: 'invalid' }).expect(400);
+    await agent.post('/api/manage/personal').set('Origin', origin).send({ ...personal, size: 'gigantic' }).expect(400);
+    const personalId: string = (await agent.post('/api/manage/personal').set('Origin', origin).send(personal).expect(201)).body.data._id;
+    const hiddenPersonalId: string = (await agent.post('/api/manage/personal').set('Origin', origin).send({ ...personal, title: 'Hidden item', visible: false, order: 0 }).expect(201)).body.data._id;
+    const publicPersonal = (await request(app).get('/api/personal?category=hobbies').expect(200)).body.data;
+    if (publicPersonal.length !== 1 || publicPersonal[0].title !== personal.title || 'imagePublicId' in publicPersonal[0]) throw new Error('Personal public filter or private image field failed');
+    await request(app).get('/api/personal?category=invalid').expect(400);
+    await agent.put(`/api/manage/personal/${personalId}`).set('Origin', origin).send({ ...personal, title: 'Updated hobby', order: 0, size: 'wide' }).expect(200);
+    if ((await request(app).get('/api/personal').expect(200)).body.data[0].title !== 'Updated hobby') throw new Error('Personal update did not reach public API');
     await request(app).post('/api/contact').set('Origin', origin).send({ name: 'Visitor', email: 'visitor@example.com', message: 'Hello there.' }).expect(201);
     await request(app).post('/api/contact').set('Origin', origin).send({ name: '', email: 'not-email', message: '' }).expect(400);
     const messages = await agent.get('/api/manage/messages').expect(200);
@@ -78,6 +89,8 @@ async function test(): Promise<void> {
     await agent.delete(`/api/manage/skills/${skillId}`).set('Origin', origin).expect(200);
     await agent.delete(`/api/manage/experience/${experienceId}`).set('Origin', origin).expect(200);
     await agent.delete(`/api/manage/certificates/${certificateId}`).set('Origin', origin).expect(200);
+    await agent.delete(`/api/manage/personal/${personalId}`).set('Origin', origin).expect(200);
+    await agent.delete(`/api/manage/personal/${hiddenPersonalId}`).set('Origin', origin).expect(200);
     await agent.post('/api/auth/logout').set('Origin', origin).expect(200);
     if ((await agent.get('/api/auth/me').expect(200)).body.data.authenticated !== false) throw new Error('Logout should clear session status');
     await agent.get('/api/manage/messages').expect(401);
