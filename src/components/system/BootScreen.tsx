@@ -10,9 +10,10 @@ interface BootScreenProps {
   error: string | null;
   onRetry: () => void;
   onSkip: () => void;
+  onContinue: () => void;
 }
 
-export function BootScreen({ os, username, hostname, dataReady, skipCosmetics, completing, error, onRetry, onSkip }: BootScreenProps) {
+export function BootScreen({ os, username, hostname, dataReady, skipCosmetics, completing, error, onRetry, onSkip, onContinue }: BootScreenProps) {
   const [cosmeticStep, setCosmeticStep] = useState(0);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export function BootScreen({ os, username, hostname, dataReady, skipCosmetics, c
       <p className={skipCosmetics || cosmeticStep >= 1 ? 'visible' : ''}>&gt; loading interface <span>........ OK</span></p>
       <p className={skipCosmetics || cosmeticStep >= 2 || dataReady || !!error ? 'visible' : ''}>&gt; loading profile <span className={error ? 'boot-failed' : ''}>........ {error ? 'FAILED' : dataReady ? 'OK' : ''}</span></p>
       {error && <p className="visible boot-error-detail">{error}</p>}
-      {error && <p className="visible"><button type="button" className="boot-retry" onClick={onRetry}>[ retry ]</button></p>}
+      {error && <p className="visible"><button type="button" className="boot-retry" onClick={onRetry}>[ retry ]</button> <button type="button" className="boot-retry" onClick={onContinue}>[ continue ]</button></p>}
       <p className={`boot-ready ${completing ? 'visible' : ''}`}>SYSTEM READY.</p>
       <p className={completing && username && hostname ? 'visible' : ''}>{username && hostname ? `${username}@${hostname}:~$` : ''} <span className="blinking-cursor">_</span></p>
     </div>

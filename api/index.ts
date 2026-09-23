@@ -4,13 +4,19 @@ import { createApp } from '../server/src/app.js';
 import { getConfig } from '../server/src/config/env.js';
 import { connectDatabase } from '../server/src/config/db.js';
 
-const config = getConfig();
-const app = createApp(config);
+type ApiApp = ReturnType<typeof createApp>;
+
+let app: ApiApp | undefined;
 let connection: Promise<void> | undefined;
 
-function ensureDatabase(): Promise<void> {
+function getApp(): ApiApp {
+  if (!app) app = createApp(getConfig());
+  return app;
+}
+
+function ensureDatabase(uri: string): Promise<void> {
   if (mongoose.connection.readyState === 1) return Promise.resolve();
-  if (!connection || mongoose.connection.readyState === 0) connection = connectDatabase(config.MONGODB_URI).catch(error => {
+  if (!connection || mongoose.connection.readyState === 0) connection = connectDatabase(uri).catch(error => {
     connection = undefined;
     throw error;
   });
@@ -22,17 +28,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const route = url.searchParams.get('__route');
   if (route === null) {
     res.statusCode = 404;
-    res.end('Not found');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(JSON.stringify({ success: false, message: 'Resource not found' }));
     return;
   }
   url.searchParams.delete('__route');
   req.url = `/api/${route}${url.search}`;
   try {
-    await ensureDatabase();
-    app(req, res);
+    const config = getConfig();
+    await ensureDatabase(config.MONGODB_URI);
+    getApp()(req, res);
   } catch {
     res.statusCode = 503;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ success: false, message: 'Database unavailable' }));
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(JSON.stringify({ success: false, message: 'Portfolio service unavailable' }));
   }
 }

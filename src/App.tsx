@@ -32,6 +32,7 @@ import { ProjectDetail } from './pages/ProjectDetail';
 type AppPhase = 'booting' | 'failed' | 'revealing';
 const MIN_BOOT_DURATION = 950;
 const CRITICAL_TIMEOUT = 15000;
+const FAILURE_DISPLAY_DURATION = 1200;
 let initialBootCompleted = false;
 
 function PortfolioContent() {
@@ -51,7 +52,6 @@ function PublicLanding() {
   const { profile, settings, retry } = usePortfolio();
   const [phase, setPhase] = useState<AppPhase>(() => initialBootCompleted ? 'revealing' : 'booting');
   const [minimumElapsed, setMinimumElapsed] = useState(false);
-  const [skipCosmetics, setSkipCosmetics] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [completing, setCompleting] = useState(false);
   const criticalReady = !profile.loading && !settings.loading && !!profile.data && !!settings.data && !profile.error && !settings.error;
@@ -73,13 +73,19 @@ function PublicLanding() {
     if (phase === 'booting' && criticalError) setPhase('failed');
   }, [phase, criticalError]);
 
-  const canComplete = phase === 'booting' && criticalReady && (minimumElapsed || skipCosmetics || settings.data?.bootEnabled === false);
+  useEffect(() => {
+    if (phase !== 'failed') return;
+    const timeout = window.setTimeout(() => { initialBootCompleted = true; setPhase('revealing'); }, FAILURE_DISPLAY_DURATION);
+    return () => window.clearTimeout(timeout);
+  }, [phase]);
+
+  const canComplete = phase === 'booting' && criticalReady && (minimumElapsed || settings.data?.bootEnabled === false);
   useEffect(() => {
     if (!canComplete) return;
     setCompleting(true);
-    const timeout = window.setTimeout(() => { initialBootCompleted = true; setPhase('revealing'); }, skipCosmetics ? 0 : 180);
+    const timeout = window.setTimeout(() => { initialBootCompleted = true; setPhase('revealing'); }, 180);
     return () => window.clearTimeout(timeout);
-  }, [canComplete, skipCosmetics]);
+  }, [canComplete]);
 
   const handleRetry = useCallback(() => {
     setTimedOut(false);
@@ -88,8 +94,9 @@ function PublicLanding() {
     retry();
   }, [retry]);
 
-  if (phase !== 'revealing') return <BootScreen os={settings.data?.systemOS || 'portfolioOS'} username={settings.data?.terminalUsername} hostname={settings.data?.terminalHostname} dataReady={criticalReady} skipCosmetics={skipCosmetics} completing={completing} error={phase === 'failed' ? criticalError || 'Unable to load portfolio data.' : null} onRetry={handleRetry} onSkip={() => setSkipCosmetics(true)} />;
-  return <PortfolioContent />;
+  const revealPortfolio = useCallback(() => { initialBootCompleted = true; setPhase('revealing'); }, []);
+
+  return <><PortfolioContent />{phase !== 'revealing' && <BootScreen os={settings.data?.systemOS || 'portfolioOS'} username={settings.data?.terminalUsername} hostname={settings.data?.terminalHostname} dataReady={criticalReady} skipCosmetics={false} completing={completing} error={phase === 'failed' ? criticalError || 'Unable to load portfolio data.' : null} onRetry={handleRetry} onSkip={revealPortfolio} onContinue={revealPortfolio} />}</>;
 }
 
 export default function App() {
