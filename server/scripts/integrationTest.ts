@@ -39,6 +39,8 @@ async function test(): Promise<void> {
     const project = { name: 'Test Project', slug: 'test-project', shortDescription: 'An integration test project.', overview: '', problem: '', solution: '', challenges: '', result: '', features: ['Feature'], thumbnail: '', thumbnailPublicId: '', gallery: [], galleryPublicIds: [], stack: ['React'], status: 'development', githubUrl: '', liveUrl: '', featured: true, displayOrder: 2 };
     const created = await agent.post('/api/manage/projects').set('Origin', origin).send(project).expect(201);
     const projectId: string = created.body.data._id;
+    const bootstrap = await request(app).get('/api/portfolio').expect('Content-Type', /json/).expect(200);
+    if (!bootstrap.body.success || bootstrap.body.data.profile.name !== profile.name || bootstrap.body.data.settings.siteTitle !== settings.siteTitle || bootstrap.body.data.projects.length !== 1) throw new Error('Public portfolio bootstrap contract failed');
     const firstProjectId: string = (await agent.post('/api/manage/projects').set('Origin', origin).send({ ...project, slug: 'first-project', name: 'First Project', displayOrder: 0, featured: false }).expect(201)).body.data._id;
     if ((await request(app).get('/api/projects/test-project').expect(200)).body.data.name !== project.name) throw new Error('Project detail missing');
     await agent.put(`/api/manage/projects/${projectId}`).set('Origin', origin).send({ ...project, name: 'Updated Project' }).expect(200);

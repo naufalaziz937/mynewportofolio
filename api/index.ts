@@ -34,11 +34,15 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   }
   url.searchParams.delete('__route');
   req.url = `/api/${route}${url.search}`;
+  let stage = 'configuration';
   try {
     const config = getConfig();
+    stage = 'database';
     await ensureDatabase(config.MONGODB_URI);
+    stage = 'application';
     getApp()(req, res);
-  } catch {
+  } catch (error) {
+    console.error('API initialization failed', { route, stage, error: error instanceof Error ? error.name : 'UnknownError' });
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.end(JSON.stringify({ success: false, message: 'Portfolio service unavailable' }));

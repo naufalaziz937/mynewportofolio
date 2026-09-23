@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import { randomUUID } from 'node:crypto';
 import type { ServerConfig } from './config/env.js';
 import { authRoutes } from './routes/auth.js';
 import { publicRoutes } from './routes/public.js';
@@ -14,6 +15,12 @@ export function createApp(config: ServerConfig) {
   const allowedOrigins = [config.CLIENT_URL, ...(config.CLIENT_URLS?.split(',').map(value => value.trim()).filter(Boolean) ?? [])];
   app.disable('x-powered-by');
   app.set('trust proxy', config.TRUST_PROXY || false);
+  app.use((_req, res, next) => {
+    const requestId = randomUUID();
+    res.locals.requestId = requestId;
+    res.set('X-Request-Id', requestId);
+    next();
+  });
   app.use(helmet());
   app.use(cors({ origin: allowedOrigins, credentials: true }));
   app.use((req, res, next) => {
