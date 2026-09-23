@@ -1,20 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "headers": [
-    {
-      "source": "/manage/:path*",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
-      ]
-    },
-    {
-      "source": "/api/:path*",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
-      ]
-    }
-  ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index?__route=:path*" },
     { "source": "/projects/:slug", "destination": "/index.html" },

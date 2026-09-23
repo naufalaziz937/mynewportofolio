@@ -6,19 +6,6 @@ import { asyncRoute, HttpError } from '../middleware/http.js';
 
 export function publicRoutes(): Router {
   const router = Router();
-  router.get('/portfolio', asyncRoute(async (_req, res) => {
-    const [profile, projects, skills, experience, certificates, personal, settings] = await Promise.all([
-      Profile.findOne().select('-profileImagePublicId -cvPublicId').lean(),
-      Project.find().select('-thumbnailPublicId -galleryPublicIds').sort({ displayOrder: 1, createdAt: -1 }).lean(),
-      Skill.find({ visible: true }).sort({ displayOrder: 1 }).lean(),
-      Experience.find().select('-companyLogoPublicId').sort({ displayOrder: 1, startDate: -1 }).lean(),
-      Certificate.find().select('-imagePublicId').sort({ displayOrder: 1, issueDate: -1 }).lean(),
-      PersonalItem.find({ visible: true }).select('-imagePublicId').sort({ order: 1, createdAt: -1 }).lean(),
-      SiteSettings.findOne().lean()
-    ]);
-    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    res.json({ success: true, data: { profile, projects, skills, experience, certificates, personal, settings } });
-  }));
   router.get('/profile', asyncRoute(async (_req, res) => { const data = await Profile.findOne().select('-profileImagePublicId -cvPublicId').lean(); res.json({ success: true, data }); }));
   router.get('/projects', asyncRoute(async (_req, res) => { const data = await Project.find().select('-thumbnailPublicId -galleryPublicIds').sort({ displayOrder: 1, createdAt: -1 }).lean(); res.json({ success: true, data }); }));
   router.get('/projects/:slug', asyncRoute(async (req, res) => { const data = await Project.findOne({ slug: req.params.slug }).select('-thumbnailPublicId -galleryPublicIds').lean(); if (!data) throw new HttpError(404, 'Resource not found'); res.json({ success: true, data }); }));

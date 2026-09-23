@@ -10,7 +10,6 @@ export interface ExperienceRecord extends DbRecord { company: string; role: stri
 export interface CertificateRecord extends DbRecord { name: string; issuer: string; issueDate: string; image?: string; imagePublicId?: string; credentialId?: string; credentialUrl?: string; displayOrder: number }
 export interface PersonalItemRecord extends DbRecord { category: PersonalCategory; title: string; description?: string; image?: string; imagePublicId?: string; imageAlt?: string; label?: string; icon?: string; status?: string; url?: string; completed: boolean; size: PersonalCardSize; displayMode: PersonalDisplayMode; order: number; visible: boolean }
 export interface SettingsRecord extends DbRecord, SiteSettings {}
-export interface PortfolioBootstrapRecord { profile: ProfileRecord | null; projects: ProjectRecord[]; skills: SkillRecord[]; experience: ExperienceRecord[]; certificates: CertificateRecord[]; personal: PersonalItemRecord[]; settings: SettingsRecord | null }
 export interface MessageRecord extends DbRecord { name: string; email: string; message: string; read: boolean }
 export interface Overview { projects: number; skills: number; experience: number; certificates: number; messages: number; unread: number; api: string; database: string; session: string }
 export interface UploadedAsset { url: string; publicId: string }

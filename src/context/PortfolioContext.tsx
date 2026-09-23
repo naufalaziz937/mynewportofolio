@@ -27,26 +27,17 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => {
     let active = true;
-    portfolioService.bootstrap().then(data => {
-      if (!active) return;
-      setProfile({ data: data.profile, loading: false, error: null });
-      setProjects({ data: data.projects, loading: false, error: null });
-      setSkills({ data: data.skills, loading: false, error: null });
-      setExperience({ data: data.experience, loading: false, error: null });
-      setCertificates({ data: data.certificates, loading: false, error: null });
-      setPersonal({ data: data.personal, loading: false, error: null });
-      setSettings({ data: data.settings, loading: false, error: null });
-    }).catch((error: unknown) => {
-      if (!active) return;
-      const message = error instanceof Error ? error.message : 'Unable to retrieve data';
-      setProfile({ data: null, loading: false, error: message });
-      setProjects({ data: [], loading: false, error: message });
-      setSkills({ data: [], loading: false, error: message });
-      setExperience({ data: [], loading: false, error: message });
-      setCertificates({ data: [], loading: false, error: message });
-      setPersonal({ data: [], loading: false, error: message });
-      setSettings({ data: null, loading: false, error: message });
-    });
+    const load = <T,>(request: () => Promise<T>, setter: (value: Resource<T>) => void, previous: T) => {
+      setter({ data: previous, loading: true, error: null });
+      request().then(data => { if (active) setter({ data, loading: false, error: null }); }).catch((error: unknown) => { if (active) setter({ data: previous, loading: false, error: error instanceof Error ? error.message : 'Unable to retrieve data' }); });
+    };
+    load(portfolioService.profile, setProfile, null);
+    load(portfolioService.projects, setProjects, []);
+    load(portfolioService.skills, setSkills, []);
+    load(portfolioService.experience, setExperience, []);
+    load(portfolioService.certificates, setCertificates, []);
+    load(portfolioService.personal, setPersonal, []);
+    load(portfolioService.settings, setSettings, null);
     return () => { active = false; };
   }, [revision]);
   return <PortfolioContext.Provider value={{ profile, projects, skills, experience, certificates, personal, settings, retry }}>{children}</PortfolioContext.Provider>;

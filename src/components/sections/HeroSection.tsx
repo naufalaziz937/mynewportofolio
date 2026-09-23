@@ -8,20 +8,17 @@ import { ResourceState } from '../ui/ResourceState';
 import { TerminalSkeleton } from '../ui/TerminalSkeleton';
 import { TerminalButton } from '../ui/TerminalButton';
 
-const OFFICIAL_NAME = 'Nazwan Naufal Aziz';
-const OFFICIAL_ROLE = 'Software Developer';
-const PROFILE_FALLBACK = ['Building modern web applications.', 'Turning ideas into real-world solutions.'];
-
 export function HeroSection() {
   const { profile, settings, retry } = usePortfolio();
   const person = profile.data;
   const config = settings.data;
+  const role = person?.role.split(' ') ?? [];
   return <section id="home" className="hero section"><div className="hero-copy">
     <div className="hero-eyebrow entrance one"><span className="green">&gt;</span> whoami <span className="hero-path">// /home/<DecryptingTextLoader value={person?.username} loading={profile.loading} estimatedLength={8} /></span></div>
     <div className="hero-intro entrance two"><DecryptingTextLoader value={person?.heroGreeting} loading={profile.loading} estimatedLength={7} /></div>
-    <h1 className="hero-name entrance three"><DecryptingTextLoader value={profile.loading ? undefined : OFFICIAL_NAME} loading={profile.loading} estimatedLength={19} /><BlinkingCursor /></h1>
-    <h2 className="hero-role entrance four">{profile.loading ? <DecryptingTextLoader loading estimatedLength={20} /> : <><DecryptingTextLoader value={OFFICIAL_ROLE.split(' ')[0]} estimatedLength={8} /> <span><DecryptingTextLoader value={OFFICIAL_ROLE.split(' ')[1]} estimatedLength={9} /></span></>}</h2>
-    <div className="hero-description entrance five">{profile.loading ? <TerminalSkeleton lines={3} /> : (person?.heroDescription ?? PROFILE_FALLBACK).map(line => <p key={line}>{line}</p>)}</div>
+    <h1 className="hero-name entrance three"><DecryptingTextLoader value={person?.name} loading={profile.loading} estimatedLength={7} /><BlinkingCursor /></h1>
+    <h2 className="hero-role entrance four">{profile.loading ? <DecryptingTextLoader loading estimatedLength={20} /> : person && <><DecryptingTextLoader value={role.slice(0, -1).join(' ')} estimatedLength={15} /> <span><DecryptingTextLoader value={role.at(-1)} estimatedLength={9} /></span></>}</h2>
+    <div className="hero-description entrance five">{profile.loading ? <TerminalSkeleton lines={3} /> : person?.heroDescription.map(line => <p key={line}>{line}</p>)}</div>
     {profile.error && <ResourceState name="profile" loading={false} error={profile.error} onRetry={retry} />}
     {settings.error && <ResourceState name="settings" loading={false} error={settings.error} onRetry={retry} />}
     {!profile.loading && !profile.error && !person && <ResourceState name="profile" loading={false} error={null} empty onRetry={retry} />}
