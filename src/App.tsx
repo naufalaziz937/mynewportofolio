@@ -39,7 +39,6 @@ function PortfolioContent() {
   const location = useLocation();
   const { settings: resource } = usePortfolio();
   const settings = resource.data;
-  useEffect(() => { document.title = settings?.siteTitle || 'portfolioOS'; }, [settings?.siteTitle]);
   useEffect(() => { if (location.hash) window.requestAnimationFrame(() => document.getElementById(location.hash.slice(1))?.scrollIntoView()); }, [location.hash]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(false);

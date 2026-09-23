@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /manage
+Disallow: /api/
+
+Sitemap: https://www.nazwannaufal.site/sitemap.xml
