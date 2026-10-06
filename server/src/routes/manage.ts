@@ -49,7 +49,7 @@ export function manageRoutes(config: ServerConfig): Router {
     await removeAssets(assetIds(previous?.toObject()).filter(id => !assetIds(data).includes(id)), config);
     res.json({ success: true, data: updated });
   }));
-  router.get('/settings', asyncRoute(async (_req, res) => { res.json({ success: true, data: await SiteSettings.findOne().lean() }); }));
+  router.get('/settings', asyncRoute(async (_req, res) => { const data = await SiteSettings.findOne().lean(); res.json({ success: true, data: data ? { ...data, showBeyondTheCode: data.showBeyondTheCode ?? true } : data }); }));
   router.put('/settings', asyncRoute(async (req, res) => {
     const data = settingsSchema.parse(req.body);
     const current = await SiteSettings.findOne();

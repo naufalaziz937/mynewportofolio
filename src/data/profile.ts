@@ -12,4 +12,4 @@ export const navigation: NavigationItem[] = [
 ];
 
 // Blank values initialize the CMS form only when no settings record exists.
-export const defaultSettings: SiteSettings = { siteTitle: '', terminalUsername: '', terminalHostname: '', systemOS: '', footerQuote: '', availabilityStatus: '', bootEnabled: false, sideStreamEnabled: false, crtEnabled: false };
+export const defaultSettings: SiteSettings = { siteTitle: '', terminalUsername: '', terminalHostname: '', systemOS: '', footerQuote: '', availabilityStatus: '', bootEnabled: false, sideStreamEnabled: false, crtEnabled: false, showBeyondTheCode: true };

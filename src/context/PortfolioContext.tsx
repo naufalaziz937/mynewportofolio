@@ -36,8 +36,18 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
     load(portfolioService.skills, setSkills, []);
     load(portfolioService.experience, setExperience, []);
     load(portfolioService.certificates, setCertificates, []);
-    load(portfolioService.personal, setPersonal, []);
-    load(portfolioService.settings, setSettings, null);
+    setSettings(initial(null));
+    portfolioService.settings().then(data => {
+      if (!active) return;
+      const normalized = data ? { ...data, showBeyondTheCode: data.showBeyondTheCode ?? true } : data;
+      setSettings({ data: normalized, loading: false, error: null });
+      if (normalized?.showBeyondTheCode === false) setPersonal({ data: [], loading: false, error: null });
+      else load(portfolioService.personal, setPersonal, []);
+    }).catch((error: unknown) => {
+      if (!active) return;
+      setSettings({ data: null, loading: false, error: error instanceof Error ? error.message : 'Unable to retrieve data' });
+      setPersonal({ data: [], loading: false, error: null });
+    });
     return () => { active = false; };
   }, [revision]);
   return <PortfolioContext.Provider value={{ profile, projects, skills, experience, certificates, personal, settings, retry }}>{children}</PortfolioContext.Provider>;

@@ -8,6 +8,7 @@ import './styles.css';
 import './loading.css';
 import './personal.css';
 import './manage.css';
+import './projects.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><BrowserRouter><AuthProvider><PortfolioProvider><App /></PortfolioProvider></AuthProvider></BrowserRouter></React.StrictMode>

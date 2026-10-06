@@ -17,7 +17,7 @@ export function publicRoutes(): Router {
     const data = await PersonalItem.find({ visible: true, ...(category ? { category } : {}) }).select('-imagePublicId').sort({ order: 1, createdAt: -1 }).lean();
     res.json({ success: true, data });
   }));
-  router.get('/settings', asyncRoute(async (_req, res) => { const data = await SiteSettings.findOne().lean(); res.json({ success: true, data }); }));
+  router.get('/settings', asyncRoute(async (_req, res) => { const data = await SiteSettings.findOne().lean(); res.json({ success: true, data: data ? { ...data, showBeyondTheCode: data.showBeyondTheCode ?? true } : data }); }));
   router.post('/contact', rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: 'draft-7', legacyHeaders: false, message: { success: false, message: 'Too many messages. Try again later.' } }), asyncRoute(async (req, res) => {
     const input = contactSchema.parse(req.body);
     const message = await Message.create({ ...input, read: false });

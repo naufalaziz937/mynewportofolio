@@ -10,4 +10,4 @@ export interface Experience { id: string; role: string; company: string; company
 export interface Certificate { id: string; name: string; issuer: string; issueDate: string; image: string; credentialId?: string; credentialUrl?: string }
 export interface PersonalItem { id: string; category: PersonalCategory; title: string; description: string; image: string; imageAlt: string; label: string; icon: string; status: string; url: string; completed: boolean; size: PersonalCardSize; displayMode: PersonalDisplayMode; order: number }
 export interface SystemStatus { os: string; user: string; role: string; location: string; status: string }
-export interface SiteSettings { siteTitle: string; terminalUsername: string; terminalHostname: string; systemOS: string; footerQuote: string; availabilityStatus: string; bootEnabled: boolean; sideStreamEnabled: boolean; crtEnabled: boolean }
+export interface SiteSettings { siteTitle: string; terminalUsername: string; terminalHostname: string; systemOS: string; footerQuote: string; availabilityStatus: string; bootEnabled: boolean; sideStreamEnabled: boolean; crtEnabled: boolean; showBeyondTheCode: boolean }

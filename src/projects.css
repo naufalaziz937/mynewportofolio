@@ -1,0 +1,9 @@
+.project-more-card{display:block;color:inherit;cursor:pointer}
+.project-more-card:focus-visible{outline:2px solid #00ff66;outline-offset:3px;border-color:#00ff66}
+.project-more-visual{display:grid;place-items:center;color:#00ff66;background:linear-gradient(135deg,#04100b,#071d10)}
+.project-more-visual>svg{opacity:.72;transition:transform .25s,opacity .25s}
+.project-more-card:hover .project-more-visual>svg,.project-more-card:focus-visible .project-more-visual>svg{opacity:1;transform:translateX(3px)}
+.project-more-card .project-links{color:#a3c4aa}
+.project-more-card:hover .project-links,.project-more-card:focus-visible .project-links{color:#00ff66}
+.project-archive-shell main{max-width:1100px}
+.project-archive-heading{padding-bottom:35px}
